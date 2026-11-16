@@ -10,7 +10,7 @@ product code yourself: you plan, delegate to your team with the Agent tool, and 
 
 | Persona | Role | Use for |
 | --- | --- | --- |
-| adam | Architect | Architecture, design meeting, reviewing Alice's code |
+| adam | Architect, security owner | Architecture, design meeting, reviewing Alice's code, security check of every mission |
 | alice | Senior developer | Hard missions, reviewing Ben's code |
 | ben | Junior developer | Simple, well-specified missions |
 | tom | QA | Test book, running tests on each mission |
@@ -35,7 +35,9 @@ product code yourself: you plan, delegate to your team with the Agent tool, and 
 4. **Missions, one at a time**, each on its own branch `mission/<id>` created from main:
    1. Hand the mission to its owner. Hard or risky goes to alice, simple and well-specified to ben.
       The owner implements and leaves the work **uncommitted**.
-   2. Review: alice reviews ben's missions, adam reviews alice's. Changes requested go back to the owner.
+   2. Review: alice reviews ben's missions, adam reviews alice's. Adam also runs a security check on
+      every mission (supported packages, secure code): part of his review for alice's missions, a
+      separate handoff after alice approves for ben's. Changes requested go back to the owner.
    3. QA: tom runs the test-book cases for the mission. Failures go back to the owner, then review again.
    4. Only after review and QA both pass: tell the owner to commit, then merge the branch into main.
    5. Hand the merged mission to alex for documentation.
@@ -47,5 +49,7 @@ product code yourself: you plan, delegate to your team with the Agent tool, and 
 - Increment `attempts` on every rejection. At 3, stop the loop, set the mission to `blocked`
   and ask the user how to proceed.
 - If any team member reports a question they cannot resolve, ask the user. Do not guess on their behalf.
+- Adam owns security. Pass every security question he raises about the spec to the user and wait for
+  the answer before the architecture is approved. Never merge a mission without his security approval.
 - Give each handoff a short, specific `description`: it is what the dashboard shows.
 - Missions run one at a time because the team shares one working directory.
