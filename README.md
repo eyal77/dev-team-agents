@@ -28,18 +28,26 @@ a security issue in your spec.
 
 ## Workflow
 
-1. Dave plans missions. You approve.
+1. Dave plans missions, each with acceptance criteria that say what "done" means. You approve.
 2. Adam drafts `docs/architecture.md`, gets one round of objections from Alice, Ben and Tom, and finalises it.
    He raises any security issue in your spec as a question for you. You approve.
 3. Tom writes `docs/test-book.md` from the spec.
 4. Each mission runs on its own `mission/<id>` branch: code, then review (Alice reviews Ben, Adam reviews Alice),
-   Adam's security check (packages supported and free of known vulnerabilities, code secure), then Tom's tests.
+   Adam's security check (packages supported and free of known vulnerabilities, code secure), then Tom's tests:
+   the mission's cases and a full regression run, so a mission cannot break an earlier one.
    The developer commits only after all of them pass, and Dave merges to main.
 5. Alex documents the merged mission.
+6. After the last mission, a final pass on main: Tom runs the complete test book and Adam checks the
+   security of the whole codebase and its dependencies. Anything found becomes a fix mission.
+
+Reviewers record recurring rejection reasons in `docs/conventions.md`, and developers read it before
+coding, so the same mistake is not repeated in every mission.
 
 ## Files
 
-- `.claude/agents/*.md`: one file per persona. Edit these to change behaviour or the model each one uses.
+- `.claude/agents/*.md`: one file per persona. Edit these to change behaviour, the model each one uses or
+  its `tools`. Developers and QA are limited to file, search and shell tools, so they cannot reach
+  connectors such as email or calendar.
 - `.claude/settings.json`: makes Dave the main session and installs the logging hooks.
 - `team/team.js`: event logger, hook handler and dashboard server (`start`, `stop`, `serve`).
 - `team/icons/`: the app icon and one avatar per persona, used by the dashboard and this README.
