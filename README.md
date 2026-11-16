@@ -7,12 +7,12 @@ It runs on [Claude Code](https://claude.com/claude-code) and needs Node.js for t
 
 | | Persona | Role | Does |
 | --- | --- | --- | --- |
-| <img src="team/icons/dave.png" width="20" alt=""> | Dave | Dev manager | Takes your objectives, plans missions, hands them out, enforces the workflow |
-| <img src="team/icons/adam.png" width="20" alt=""> | Adam | Architect, security owner | Architecture decisions, one design meeting with the team, reviews Alice's code, security check of every mission |
-| <img src="team/icons/alice.png" width="20" alt=""> | Alice | Senior developer | Hard missions, reviews Ben's code |
-| <img src="team/icons/ben.png" width="20" alt=""> | Ben | Junior developer | Simple missions |
-| <img src="team/icons/tom.png" width="20" alt=""> | Tom | QA | Writes the test book from the spec, tests every mission |
-| <img src="team/icons/alex.png" width="20" alt=""> | Alex | Documentation | Documents a mission after it is merged |
+| <img src="team/icons/dave.png" width="30" alt=""> | Dave | Dev manager | Takes your objectives, plans missions, hands them out, enforces the workflow |
+| <img src="team/icons/adam.png" width="30" alt=""> | Adam | Architect, security owner | Architecture decisions, one design meeting with the team, reviews Alice's code, security check of every mission |
+| <img src="team/icons/alice.png" width="30" alt=""> | Alice | Senior developer | Hard missions, reviews Ben's code |
+| <img src="team/icons/ben.png" width="30" alt=""> | Ben | Junior developer | Simple missions |
+| <img src="team/icons/tom.png" width="30" alt=""> | Tom | QA | Writes the test book from the spec, tests every mission |
+| <img src="team/icons/alex.png" width="30" alt=""> | Alex | Documentation | Documents a mission after it is merged |
 
 ## Use it
 
