@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dev Team</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: light-dark(#f4f5f7, #14161a); --card: light-dark(#fff, #1e2127);
+    --text: light-dark(#1c1f24, #e6e8eb); --muted: light-dark(#6b7280, #9aa1ac);
+    --line: light-dark(#e2e5ea, #2c3038); --good: light-dark(#15803d, #4ade80); --bad: light-dark(#b91c1c, #f87171);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, sans-serif; }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  h2 { font-size: 12px; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .team { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .person { display: flex; gap: 10px; align-items: center; border-width: 2px; transition: border-color .3s; }
+  .person.active { border-color: var(--c); }
+  .person > div { min-width: 0; }
+  .avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--c); display: grid; place-items: center; font-size: 20px; }
+  .avatar.sm { width: 26px; height: 26px; font-size: 13px; }
+  .working .avatar { animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 35%, transparent); } }
+  @media (prefers-reduced-motion: reduce) { .working .avatar { animation: none; outline: 3px solid color-mix(in srgb, var(--c) 45%, transparent); } }
+  .name { font-weight: 600; }
+  .sub { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cols { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 800px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  .event { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .event:last-child { border: 0; }
+  .who { flex: none; display: flex; align-items: center; gap: 4px; color: var(--muted); }
+  .body { min-width: 0; flex: 1; }
+  .meta { font-size: 12px; color: var(--muted); }
+  .type { text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  .msg { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 7.5em; overflow: auto; }
+  .good { color: var(--good); } .bad { color: var(--bad); }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border: 0; }
+  .status { font-size: 11px; font-weight: 600; text-transform: uppercase; white-space: nowrap; }
+  .empty { color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>Dev Team</h1>
+<section class="team" id="team" aria-label="Team"></section>
+<div class="cols">
+  <section class="card"><h2>Interactions</h2><div id="feed" aria-live="polite"></div></section>
+  <section class="card"><h2>Missions</h2><div id="tasks"></div></section>
+</div>
+<script>
+const P = {
+  user:  { name: 'You',   role: 'Product owner',    icon: '🙂', c: '#94a3b8' },
+  dave:  { name: 'Dave',  role: 'Dev manager',      icon: '🧭', c: '#f59e0b' },
+  adam:  { name: 'Adam',  role: 'Architect',        icon: '📐', c: '#8b5cf6' },
+  alice: { name: 'Alice', role: 'Senior developer', icon: '👩‍💻', c: '#ec4899' },
+  ben:   { name: 'Ben',   role: 'Junior developer', icon: '🧑‍💻', c: '#3b82f6' },
+  tom:   { name: 'Tom',   role: 'QA',               icon: '🔍', c: '#10b981' },
+  alex:  { name: 'Alex',  role: 'Documentation',    icon: '📝', c: '#06b6d4' },
+};
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const avatar = (id, sm) => { const p = P[id] || P.user; const a = el('span', 'avatar' + (sm ? ' sm' : ''), p.icon); a.style.setProperty('--c', p.c); a.title = p.name; return a; };
+const verdict = m => /^(APPROVED|PASSED)/.test(m) ? ' good' : /^(CHANGES|FAILED)/.test(m) ? ' bad' : '';
+
+function render(events, tasks) {
+  const working = {}, tokens = {};
+  for (const e of events) {
+    if (e.type === 'handoff') working[e.to] = e.msg;
+    if (e.type === 'report') delete working[e.from];
+    if (e.type === 'cost') tokens[e.from] = (tokens[e.from] || 0) + e.tokens;
+  }
+  const feed = events.filter(e => e.type !== 'cost').reverse();
+  const last = feed[0] || {};
+
+  document.getElementById('team').replaceChildren(...Object.keys(P).filter(id => id !== 'user').map(id => {
+    const p = P[id], card = el('div', 'card person' + (id in working ? ' working' : '') + (id === last.from || id === last.to ? ' active' : ''));
+    card.style.setProperty('--c', p.c);
+    const info = el('div');
+    info.append(el('div', 'name', p.name), el('div', 'sub', p.role),
+      el('div', 'sub', (id in working ? '● ' + working[id] : 'idle') + (tokens[id] ? ` · ${Math.round(tokens[id] / 1000)}k tok` : '')));
+    card.append(avatar(id), info);
+    return card;
+  }));
+
+  document.getElementById('feed').replaceChildren(...(feed.length ? feed.map(e => {
+    const row = el('div', 'event'), who = el('div', 'who'), body = el('div', 'body'), meta = el('div', 'meta');
+    who.append(avatar(e.from, true), '→', avatar(e.to, true));
+    meta.append(el('span', 'type', e.type), ` · ${(P[e.from] || P.user).name} → ${(P[e.to] || P.user).name} · ${new Date(e.ts).toLocaleTimeString()}`);
+    body.append(meta, el('div', 'msg' + verdict(e.msg), e.msg));
+    row.append(who, body);
+    return row;
+  }) : [el('div', 'empty', 'No interactions yet. Give Dave your project objectives to start.')]));
+
+  const table = el('table');
+  for (const t of tasks) {
+    const tr = el('tr'), owner = el('td');
+    if (t.owner) owner.append(avatar(t.owner, true));
+    tr.append(owner, el('td', '', `${t.id} ${t.title}` + (t.attempts ? ` (attempt ${t.attempts + 1})` : '')),
+      el('td', 'status' + (t.status === 'done' ? ' good' : t.status === 'blocked' ? ' bad' : ''), t.status));
+    table.append(tr);
+  }
+  document.getElementById('tasks').replaceChildren(tasks.length ? table : el('div', 'empty', 'No missions yet.'));
+}
+
+let seen;
+async function poll() {
+  try {
+    const [ev, tk] = await Promise.all([fetch('/events').then(r => r.text()), fetch('/tasks').then(r => r.text())]);
+    if (ev + tk !== seen) {
+      seen = ev + tk;
+      const events = ev.split('\n').flatMap(l => { try { return [JSON.parse(l)]; } catch { return []; } });
+      let tasks = []; try { tasks = JSON.parse(tk); } catch {} // tasks.json may be mid-write
+      render(events, Array.isArray(tasks) ? tasks : []);
+    }
+  } catch {} // server restarting; next poll retries
+  setTimeout(poll, 2000);
+}
+poll();
+</script>
+</body>
+</html>

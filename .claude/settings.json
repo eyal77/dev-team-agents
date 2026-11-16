@@ -1,0 +1,17 @@
+{
+  "agent": "dave",
+  "permissions": {
+    "allow": ["Bash(node team/team.js log *)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/team/team.js", "hook"] }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Agent", "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/team/team.js", "hook"] }] }
+    ],
+    "SubagentStop": [
+      { "hooks": [{ "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/team/team.js", "hook"] }] }
+    ]
+  }
+}
